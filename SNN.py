@@ -38,7 +38,7 @@ class SoftmaxNeuralNetwork:
         self.ierr = alpha * outer(self.input, herr[:-1])
         return 0.5 * np.sum(np.abs(labels-self.predictions))
 
-    def train(self, training_data, maxiter=5000, alpha=0.05, lmbda=0, epsilon=1.5e-8, display_progress=False):       
+    def train(self, training_data, maxiter=5000, alpha=0.05, lmbda=0, epsilon=1.5e-8, display_progress=False, anneal=lambda x: x):       
         iteration = 0
         error = sys.float_info.max
         while error > epsilon and iteration < maxiter:
@@ -50,10 +50,10 @@ class SoftmaxNeuralNetwork:
                 self.forward_propagation(ex)
                 size += abs(self.output)
                 error += self.backward_propagation(labels, alpha=alpha)
-                #self.imom = self.ierr + gamma*self.imom
-                #self.omom = self.oerr + gamma*self.omom
-                self.iweights += self.ierr - lmbda*self.l2penalty(self.iweights)
-                self.oweights += self.oerr - lmbda*self.l2penalty(self.oweights)
+                self.imom = self.ierr + gamma*self.imom
+                self.omom = self.oerr + gamma*self.omom
+                self.iweights += self.imom - lmbda*np.linalg.norm(self.iweights)*self.iweights#- lmbda*self.l2penalty(self.iweights)
+                self.oweights += self.omom - lmbda*np.linalg.norm(self.oweights)*self.oweights#- lmbda*self.l2penalty(self.oweights)
                 #self.iweights = self.iweights*(1-lmbda)
                 #self.oweights = self.oweights*(1-lmbda)
             if display_progress and iteration%10==0:

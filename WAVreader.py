@@ -70,10 +70,18 @@ class WAVreader:
             self.deltaset += [(d, self.labels[key]) for d in deltas]
             self.lnMFCCset += [(mfcc, self.labels[key]) for mfcc in lnMFCCs]
             self.lnDeltaset += [(d, self.labels[key]) for d in lnDeltas]
-            self.concatset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729), self.labels[key]) 
-                               for i in range(len(lnDeltas))]
-            self.dataset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729),
-                              [1 if j==self.labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
+            #self.concatset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729), self.labels[key]) 
+             #                  for i in range(len(lnDeltas))]
+            #self.dataset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729),
+             #                 [1 if j==self.labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
+            self.concatset += [(np.concatenate((lnMFCCs[i+2],
+                                           lnDeltas[i],
+                                           np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])).diagonal())),
+                            self.labels[key]) for i in range(len(lnDeltas))]
+            self.dataset += [(np.concatenate((lnMFCCs[i+2],
+                                            lnDeltas[i],
+                                            np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])).diagonal())),
+                             [1 if j==self.labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
             print "Finished file "+filename
         self.length = len(self.dataset)
         print

@@ -45,6 +45,8 @@ class ShallowNeuralNetwork:
                 self.forward_propagation(ex)
                 size += abs(self.output)
                 error += self.backward_propagation(labels, alpha=alpha)
+                self.oweights = self.oweights * (1-lmbda*np.linalg.norm(self.oweights))
+                self.iweights = self.iweights * (1-lmbda*np.linalg.norm(self.iweights))
                 #self.imom = self.ierr + gamma*self.imom
                 #self.omom = self.oerr + gamma*self.omom
                 #self.iweights += self.imom - lmbda*self.l2penalty(self.iweights)
