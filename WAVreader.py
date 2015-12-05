@@ -6,11 +6,12 @@ from numpy import dot
 
 
 class WAVreader:
-    # Takes list of file names, list of labels to apply, and minimum threshold for low-volume filtering. 
+    # Takes list of file names, list of labels to apply, and threshold as a percent of max volume for low-volume filtering. 
     # Labels should start at 0 and increase as new speakers are added. To use range(0,#ofFiles) as the labelling just input an empty list
     def __init__(self, filenames, labels, threshold):
         self.filenames = filenames
         self.labels = labels
+        self.length = 0
         self.FFTset = [] #The set of labeled Fourier Transforms
         self.MFset = [] #The set of labeled Mel Frequencies
         self.MFCCset = [] #The set of labeled MFCCs (with cosine transform)
@@ -57,31 +58,29 @@ class WAVreader:
             lnDeltas = [[np.sign(c[i])*log(abs(c[i])/10) for i in range(26)] for c in deltas]
             
             #Add data structures to cumulative, labeled data structures
-            self.FFTset += [(ft, labels[key]) for ft in ffts]
-            self.MFset += [(mf, labels[key]) for mf in Mfs]
-            self.MFCCset += [(mfcc, labels[key]) for mfcc in MFCCs]
-            self.deltaset += [(d, labels[key]) for d in deltas]
-            self.lnMFCCset += [(mfcc, labels[key]) for mfcc in lnMFCCs]
-            self.lnDeltaset += [(d, labels[key]) for d in lnDeltas]
-            self.concatset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729), labels[key]) 
+            self.FFTset += [(ft, self.labels[key]) for ft in ffts]
+            self.MFset += [(mf, self.labels[key]) for mf in Mfs]
+            self.MFCCset += [(mfcc, self.labels[key]) for mfcc in MFCCs]
+            self.deltaset += [(d, self.labels[key]) for d in deltas]
+            self.lnMFCCset += [(mfcc, self.labels[key]) for mfcc in lnMFCCs]
+            self.lnDeltaset += [(d, self.labels[key]) for d in lnDeltas]
+            self.concatset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729), self.labels[key]) 
                                for i in range(len(lnDeltas))]
             self.dataset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729),
-                              [1 if j==labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
+                              [1 if j==self.labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
             print "Finished file "+filename
+        self.length = len(self.dataset)
         print
-        print "Final data set consists of %d windows over %d classes" % (len(self.dataset), max(self.labels))
+        print "Final data set consists of %d windows over %d classes" % (self.length, max(self.labels))
 
 
     def purge(self, dat, threshold):
         result = []
-        log = ""
+        t = threshold*np.max(map(np.max, dat))
+        print t
         for window in dat:
-            total = np.sum(window)
-            if abs(total) > threshold: result.append(window)
-            #log += str(total)+" "
+            if max(np.abs(window)) > t: result.append(window)
         print "Scaled %d windows down to %d" % (len(dat), len(result))
-        #print
-        #print log
         return result
 
     
