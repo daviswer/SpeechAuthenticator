@@ -11,6 +11,7 @@ class WAVreader:
     def __init__(self, filenames, labels, threshold):
         self.filenames = filenames
         self.labels = labels
+        self.numClasses = 0
         self.length = 0
         self.FFTset = [] #The set of labeled Fourier Transforms
         self.MFset = [] #The set of labeled Mel Frequencies
@@ -21,9 +22,14 @@ class WAVreader:
         self.concatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas
         self.dataset = [] #concatset, but labeled in such a way as to allow softmax learning
         
+        #Get label info
         if len(labels)==0:
             self.labels = range(len(filenames))
+        self.numClasses = max(self.labels)+1
+        
+        #MFCC calculation
         for key, filename in enumerate(filenames):
+            
             #Read the file, split into windows
             rate, x = wavfile.read(filename);
             samplelen = rate*0.03
@@ -71,7 +77,7 @@ class WAVreader:
             print "Finished file "+filename
         self.length = len(self.dataset)
         print
-        print "Final data set consists of %d windows over %d classes" % (self.length, max(self.labels))
+        print "Final data set consists of %d windows over %d classes" % (self.length, self.numClasses)
 
 
     def purge(self, dat, threshold):
