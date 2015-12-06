@@ -1,24 +1,111 @@
+
+# coding: utf-8
+
+# In[25]:
+
+get_ipython().magic(u'matplotlib inline')
+
 from sklearn import svm
 from WAVreader import *
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
 
-fileList = ['davis.wav',
-			'test1.wav'
-			]
-data = WAVreader(fileList, [], 0.5)
+
+# In[4]:
+
+filelist = ['Audio/1-1.wav',
+            'Audio/1-2.wav',
+            'Audio/2-1.wav',
+            'Audio/2-2.wav',
+            'Audio/3-1.wav',
+            'Audio/3-2.wav',
+            'Audio/4-1.wav',
+            'Audio/4-2.wav',
+            'Audio/5-1.wav',
+            'Audio/5-2.wav',
+            'Audio/6-1.wav',
+            'Audio/6-2.wav',
+            'Audio/7-1.wav',
+            'Audio/7-2.wav',
+            'Audio/8-1.wav',
+            'Audio/8-2.wav',
+            'Audio/9-1.wav',
+            'Audio/9-2.wav',
+            ]
+info = WAVreader(filelist, [0,0,5,5,7,7,3,3,4,4,1,1,6,6,2,2,8,8], 0.05)
+data = info.svmset
 
 C= 1.0 #regularizaton parameter
 
 trainset = []
 testset = []
 
-for i in xrange(len(data.concatset)):
-  if i%10 == 2: testset.append(data.concatset[i])
-  else: trainset.append(data.concatset[i])
+for i in xrange(len(data)):
+    if i%10 == 2: testset.append(data[i])
+    else: trainset.append(data[i])
+print len(trainset),len(testset)
 
-clf = svm.SVC(decision_function_shape='ovo')
-clf.fit(zip(*trainset)[0],np.array(trainset)[:,1]) 
-clf.predict(testset)
+
+
+# In[27]:
+
+clf = svm.SVC()
+X = np.array([clip[0][:-1] for clip in trainset])
+meanX = np.mean(X, axis=0)
+varX = np.var(X, axis=0)
+standardX = np.divide(X-meanX, varX)
+Y = np.array([clip[1] for clip in trainset])
+clf.fit(standardX,Y) 
+testX = [clip[0][:-1] for clip in testset]
+testmeanX = np.mean(X, axis=0)
+testvarX = np.var(X, axis=0)
+teststandardX = np.divide(X-meanX, varX)
+print clf.score(teststandardX, Y)
+
+
+# In[28]:
+
+def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+ytrue = Y
+ypred = []
+for clip in teststandardX:
+    ypred.append(clf.predict(clip))
+confusion=confusion_matrix(ytrue, ypred)
+cm_normalized = confusion.astype('float') / confusion.sum(axis=1)[:, np.newaxis]
+print('Confusion matrix')
+print(confusion)
+plt.figure()
+plot_confusion_matrix(cm_normalized, title='Normalized confusion matrix')
+
+
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
+
+
+# In[6]:
 
 # Plotting SVM
 

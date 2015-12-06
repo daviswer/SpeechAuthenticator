@@ -19,8 +19,9 @@ class WAVreader:
         self.deltaset = [] #The set of labeled MFCC deltas
         self.lnMFCCset = [] #The set of labeled log-scaled MFCCs
         self.lnDeltaset = [] #The set of labeled log-scaled deltas
-        self.concatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas
+        self.concatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas, plus tensor diagonal
         self.dataset = [] #concatset, but labeled in such a way as to allow softmax learning
+        self.svmset = [] #The set of labeled concatenations, no tensor info, for use in SVMs
         
         #Get label info
         if len(labels)==0:
@@ -82,6 +83,10 @@ class WAVreader:
                                             lnDeltas[i],
                                             np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])).diagonal())),
                              [1 if j==self.labels[key] else 0 for j in range(self.numClasses)]) for i in range(len(lnDeltas))]
+            self.svmset += [(np.concatenate((lnMFCCs[i+2],
+                                           lnDeltas[i],
+                                           )),
+                            self.labels[key]) for i in range(len(lnDeltas))]
             print "Finished file "+filename
         self.length = len(self.dataset)
         print
