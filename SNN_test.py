@@ -43,7 +43,7 @@ class SoftmaxNeuralNetwork:
         iteration = 0
         error = sys.float_info.max
         while error > epsilon and iteration < maxiter:
-            gamma = 1.0/(1+iteration)#math.trunc(np.sqrt(iteration)))
+            gamma = 1.0/(1.1+iteration)#math.trunc(np.sqrt(iteration)))
             error = 0.0
             size = 0.0
             shuffle(training_data)
