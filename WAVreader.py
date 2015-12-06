@@ -81,7 +81,7 @@ class WAVreader:
             self.dataset += [(np.concatenate((lnMFCCs[i+2],
                                             lnDeltas[i],
                                             np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])).diagonal())),
-                             [1 if j==self.labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
+                             [1 if j==self.labels[key] else 0 for j in range(self.numClasses)]) for i in range(len(lnDeltas))]
             print "Finished file "+filename
         self.length = len(self.dataset)
         print
