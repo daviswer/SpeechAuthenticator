@@ -41,7 +41,7 @@ with pylab.style.context('fivethirtyeight'):
 	pylab.xlabel('Number of classes')
 	pylab.ylabel('Fraction')
 	pylab.title('Plot of Neural Tensor Network')
-NTN.show()
+pylab.show()
 
 SVM = pylab.figure(3)
 with pylab.style.context('fivethirtyeight'):
@@ -53,7 +53,7 @@ with pylab.style.context('fivethirtyeight'):
 	pylab.xlabel('Number of classes')
 	pylab.ylabel('Fraction')
 	pylab.title('Plot of Support Vector Machine')
-SVM.show()
+pylab.show()
 
 compare  = pylab.figure(4)
 with pylab.style.context('fivethirtyeight'):
@@ -62,7 +62,6 @@ with pylab.style.context('fivethirtyeight'):
 	pylab.plot(classes, test_accuracyNTN, label='Improvement for NTN')
 	pylab.plot(classes, test_accuracySVM, label='Improvement for SVM')
 	pylab.legend(loc='upper right',prop={'size':9})
-	pylab.xlabel('Number of classes')
 	pylab.ylabel('Fraction')
 	pylab.title('Comparing test accuracy of NTN, SNN, SVM')
 	pylab.subplot(2, 1, 2)
@@ -73,4 +72,4 @@ with pylab.style.context('fivethirtyeight'):
 	pylab.xlabel('Number of classes')
 	pylab.ylabel('Fraction')
 	pylab.title('Comparing improvements of NTN, SNN, SVM')
-compare.show()
+pylab.show()
