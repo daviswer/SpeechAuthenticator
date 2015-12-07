@@ -19,8 +19,10 @@ class WAVreader:
         self.deltaset = [] #The set of labeled MFCC deltas
         self.lnMFCCset = [] #The set of labeled log-scaled MFCCs
         self.lnDeltaset = [] #The set of labeled log-scaled deltas
-        self.concatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas, plus tensor diagonal
+        self.concatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas, PLUS TENSOR DIAGONAL
         self.dataset = [] #concatset, but labeled in such a way as to allow softmax learning
+        self.tconcatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas, PLUS THE FULL TENSOR
+        self.tdataset = [] #concatset, but labeled in such a way as to allow softmax learning
         self.svmset = [] #The set of labeled concatenations, no tensor info, for use in SVMs
         
         #Get label info
@@ -71,10 +73,10 @@ class WAVreader:
             self.deltaset += [(d, self.labels[key]) for d in deltas]
             self.lnMFCCset += [(mfcc, self.labels[key]) for mfcc in lnMFCCs]
             self.lnDeltaset += [(d, self.labels[key]) for d in lnDeltas]
-            #self.concatset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729), self.labels[key]) 
-             #                  for i in range(len(lnDeltas))]
-            #self.dataset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729),
-             #                 [1 if j==self.labels[key] else 0 for j in range(len(filenames))]) for i in range(len(lnDeltas))]
+            self.tconcatset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729), self.labels[key]) 
+                               for i in range(len(lnDeltas))]
+            self.tdataset += [(np.reshape(np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])), 729),
+                              [1 if j==self.labels[key] else 0 for j in range(self.numClasses)]) for i in range(len(lnDeltas))]
             self.concatset += [(np.concatenate((lnMFCCs[i+2],
                                            lnDeltas[i],
                                            np.outer(np.append(lnMFCCs[i+2], [1]),np.append(lnDeltas[i], [1])).diagonal())),
