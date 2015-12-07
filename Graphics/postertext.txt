@@ -1,0 +1,19 @@
+Question: Can we use explicit supervectors to build a voice-recognition system that does not overfit (rather than implicitly mapping inputs to an inifinite-dimensional space)?
+
+Methods: 
+1.	Record 30 seconds of reading aloud from Alice in Wonderland (n=9, 3 female, 6 male)
+2.	Split each sample into overlapping 30-ms windows
+3.	Filter out empty windows (< 5% max volume in sample)
+4.	Find the 26 Mel Frequency Cepstral Coefficients of each window
+	a.	Perform a Fast Fourier Transform
+	b.	Log-scale the frequencies
+	c.	Apply 26 overlapping triangular filters to discretize frequencies, sum over each frequency “bin”
+	d.	Perform a Discrete Cosine Transform to extract frequency-generating patterns
+5.	Append the 26 MFCC deltas (weighted average of MFCC differences for 2 windows on either side)
+6.	Log-scale the MFCCs and MFCC deltas
+
+Results (3 columns)
+
+Results (integrated)
+
+Conclusion: Explicitly defined supervectors create non-convex gradients that are too difficult to maximize using SGD. 
