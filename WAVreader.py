@@ -24,6 +24,9 @@ class WAVreader:
         self.tconcatset = [] #The set of labeled concatenations of log-scaled MFCCs and deltas, PLUS THE FULL TENSOR
         self.tdataset = [] #concatset, but labeled in such a way as to allow softmax learning
         self.svmset = [] #The set of labeled concatenations, no tensor info, for use in SVMs
+#        self.svmdeltaset = []
+ #       self.svmfftset = []
+  #      self.svmtestset = []
         
         #Get label info
         if len(labels)==0:
@@ -89,6 +92,12 @@ class WAVreader:
                                            lnDeltas[i],
                                            )),
                             self.labels[key]) for i in range(len(lnDeltas))]
+#            self.svmtestset += [(np.concatenate((lnMFCCs[i],
+ #                                          ffts[i],
+  #                                         )),
+   #                         self.labels[key]) for i in range(len(ffts))]
+    #        self.svmdeltaset += [(d, self.labels[key]) for d in lnDeltas]
+     #       self.svmfftset += [(f, self.labels[key]) for f in ffts]
             print "Finished file "+filename
         self.length = len(self.dataset)
         print
