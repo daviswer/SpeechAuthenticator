@@ -35,10 +35,7 @@ class QLNetwork:
         self.timetracker = [0]
         
     def getQ(self, action):
-        
-        
         self.input = np.append(np.sort(self.preds), [self.numSamples, action,1])
-#         print self.input
         self.hidden = self.afunc(dot(self.input, self.iweights))
         self.output = self.afunc(dot(self.hidden, self.oweights))
         return self.output[0]
@@ -86,7 +83,18 @@ class QLNetwork:
         herr = dot(oerr, self.oweights.T) * self.d_afunc(self.hidden)
         self.oweights += alpha * outer(self.hidden, oerr)
         self.iweights += alpha * outer(self.input, herr)
-        return np.sum(0.5 * oerr**2)
+        self.errtracker.append(np.sum(0.5*oerr**2))
+    
+    def predict(self, speakerarr):
+        action = -1 if self.getQ(-1)>self.getQ(1) else 1
+        if action==1 or self.numSamples==len(speakerarr):
+            #CONCLUDE, RETURN TO CHECKER
+            self.done = True
+        else:
+            #RESAMPLE
+            probs = self.predictor(speakerarr[self.numSamples][0])
+            self.numSamples += 1
+            self.preds = self.preds + probs
 
     def train(self, maxruns=100, annealAlpha = lambda x: 0.001, annealEpsilon = lambda x: 0.5, epsilon=1.5e-8, 
               progress_interval=1000, super_verbose=False, lmbda = 0.1):       
@@ -95,27 +103,43 @@ class QLNetwork:
         while error > epsilon and run < maxruns:
             for speaker in self.trainset:
                 shuffle(speaker)
-            error = 0.0
             alpha = annealAlpha(run)
             self.iweights *= 1-alpha*lmbda
             self.oweights *= 1-alpha*lmbda
             for i in range(self.numClasses):
                 self.curSpeaker = i
                 while(self.done == False):
-                    error += self.step(alpha=alpha, epsilon=annealEpsilon(run), super_verbose = super_verbose)
+                    self.step(alpha=alpha, epsilon=annealEpsilon(run), super_verbose = super_verbose)
                 #RESET FOR NEW RUN
                 self.numSamples = 0
                 self.done = False
                 self.preds = np.ones(self.numClasses)
                 
             run += 1
-            self.errtracker.append(error)
             if run%progress_interval==0:
-                print 'completed iteration %s; error is %s; size is %s' % (run, error, np.sum(np.absolute(self.iweights)))
+                print 'completed iteration %s; size is %s' % (run, np.sum(np.absolute(self.iweights)))
             
-    def accuracy(self, data):
-        score = 0.0
-        for ex, label in data:
-            if self.predict(ex)[0]/abs(self.predict(ex)[0])==label: score+=1
-        return score/len(data)
+    def test(self, testset, maxiter=100):
+        score = 0
+        runtime = 0
+        mintime = 1000000
+        maxtime = -1
+        for speaker in testset:
+            for _ in xrange(maxiter):
+                #RESET
+                shuffle(speaker)
+                self.done = False
+                self.numSamples = 0
+                self.preds = np.ones(self.numClasses)
+                #RESAMPLE UNTIL DONE
+                while self.done == False:
+                    self.predict(speaker)
+                #TEST PREDICTION
+                choice = np.argmax(self.preds)
+                runtime += self.numSamples
+                mintime = min(mintime, self.numSamples)
+                maxtime = max(maxtime, self.numSamples)
+                score += 1 if np.argmax(self.preds)==speaker[0][1] else 0
+        return ((score+0.0)/(maxiter*self.numClasses), (runtime+0.0)/(maxiter*self.numClasses),
+               mintime, maxtime)
             

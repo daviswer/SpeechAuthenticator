@@ -1,3 +1,4 @@
+%values are given in order from 2-class to 9-class
 expected_error = [ 1/2, 2/3, 3/4, 4/5, 5/6, 6/7, 7/8, 8/9 ]
 train_accuracy = [ 
     0.883458646617, 
