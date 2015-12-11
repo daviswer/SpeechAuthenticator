@@ -8,6 +8,8 @@ SNN.py is the neural tensor network used for both neural models. Training/testin
 
 QLing.py is our Q-learner neural network implementation. Again, training/testing it requires extracting the appropriate data set from WAVreader. 
 
+Command to run each script: python <filename>
+
 Next, the testing scripts:
 
 SVMtest.ipynb is an ipython notebook file that uses WAVreader on a list of files, extracts the appropriate dataset, trains an SVM, outputs a confusion matrix, and extracts the appropriate testing metrics. 
